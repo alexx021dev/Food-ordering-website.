@@ -1,51 +1,62 @@
+
+
 let addToCartButtons = document.querySelectorAll('.add-to-cart');
-// all the add to cart buttons in the page returns list of all  buttons.
-
-//  the goal of this function is to add event listeners to each button
+let cartItemsContainer = document.querySelector('.cart-items'); // qery selctor all returns node list and can't be used as single in the code.
+let cartTotal = document.querySelector('.cart-total');
+let cart = [];
 addToCartButtons.forEach(button => {
-    button.addEventListener('click', () => {
 
-        let productCard = button.closest('.product-card');
-        let productName = productCard.querySelector('.product-name').textContent;
-        console.log(`Product added to cart: ${productName}`);
-
-    })
-});
-
-// showing the added product to the cart list
-
-const cartItemsContainer = document.querySelector('.cart-items');
-const cartTotal = document.querySelector('.cart-total');
-
-let cart = []; // To keep track of products in cart is array of objects 
-
-addToCartButtons.forEach(button => {
   button.addEventListener('click', () => {
-    const productCard = button.closest('.product-card');
-    const productName = productCard.querySelector('.product-name').textContent;
-    const productPriceText = productCard.querySelector('.product-price').textContent;
-    const productPrice = parseFloat(productPriceText.replace('$', ''));
+    let productcard = button.closest('.product-card');
+    let productName = productcard.querySelector('.product-name').textContent;
+    let productPriceText = productcard.querySelector('.product-price').textContent;
+    let productPrice = parseFloat(productPriceText.replace('$', ''));
+     
+    //  checking if the product already existed.
 
-    // Add product to cart array
-    cart.push({ name: productName, price: productPrice });
+    const existingItem = cart.find(item => item.name === productName);
 
-    // Update the cart display
-    renderCart(); // takes all this and add readymade item  to the cart.
+    if(existingItem){
+      existingItem.quantity += 1;
+    } else {
+      cart.push({
+        name: productName,
+        price: productPrice,
+        quantity: 1
+      });
+
+    }
+    renderCart();
   });
 });
 
-function renderCart() {
-  cartItemsContainer.innerHTML = ''; // Clear current cart
-
+function renderCart(){
+  cartItemsContainer.innerHTML = ''; // Clear current cart items
   let total = 0;
 
-  cart.forEach(item => {
-    const li = document.createElement('li');
-    li.textContent = `${item.name} - $${item.price.toFixed(2)}`;
-    cartItemsContainer.appendChild(li);
-    total += item.price;
-  });
+  cart.forEach((item, index) => {
+    
+    let li = document.createElement('li');
+    li.textContent = `${item.name} x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}`;
+    //  creating remove button.
+    let remove_btn = document.createElement('button');
+    remove_btn.textContent = 'remove';
+    remove_btn.classList.add('remove-btn');
 
-  cartTotal.textContent = `Total: $${total.toFixed(2)}`;
+    remove_btn.addEventListener('click', () => { 
+      cart.splice(index, 1);
+      renderCart();
+    });
+
+    li.append(remove_btn);
+    cartItemsContainer.append(li);
+
+    total += item.price * item.quantity;
+  });
+ cartTotal.textContent = `Total: $${total.toFixed(2)}`;
 }
+
+/*  new  */
+
+
 
